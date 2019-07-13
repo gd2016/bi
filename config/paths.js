@@ -1,4 +1,4 @@
-'use strict';
+
 
 const path = require('path');
 const fs = require('fs');
@@ -65,6 +65,14 @@ const resolveModule = (resolveFn, filePath) => {
   return resolveFn(`${filePath}.js`);
 };
 
+const getEntry =  () => {
+  const dirName = fs.readdirSync('./src').filter( dir => {return dir.indexOf('.')===- 1})
+  const appModules = dirName.map(element => {
+    let paths = resolveApp(`src/${element}/index.js`)
+    return {path: paths, name: element}
+  })
+  return appModules
+}
 // config after eject: we're in ./config/
 module.exports = {
   dotenv: resolveApp('.env'),
@@ -72,7 +80,8 @@ module.exports = {
   appBuild: resolveApp('build'),
   appPublic: resolveApp('public'),
   appHtml: resolveApp('public/index.html'),
-  appIndexJs: resolveModule(resolveApp, 'src/index'),
+  // appIndexJs: resolveModule(resolveApp, 'src/index'),
+  entriesPath: getEntry('src'),
   appPackageJson: resolveApp('package.json'),
   appSrc: resolveApp('src'),
   appTsConfig: resolveApp('tsconfig.json'),
