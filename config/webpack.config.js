@@ -192,19 +192,19 @@ module.exports = function(webpackEnv) {
       pathinfo: isEnvDevelopment,
       // There will be one main bundle, and one file per asynchronous chunk.
       // In development, it does not produce real files.
-      filename: isEnvProduction
-        ? 'static/js/[name].[contenthash:8].js'
-        : isEnvDevelopment && 'static/js/[name].bundle.js',
-      // filename: function(chunk){
-      //   const chunkName = chunk.chunk.name.split('~')[1]
-      //   return isEnvProduction ? `${chunkName}/static/js/[name].[contenthash:8].chunk.js` : isEnvDevelopment && 'static/js/[name].chunk.js'
-      // },
+      // filename: isEnvProduction
+      //   ? 'static/js/[name].[contenthash:8].js'
+      //   : isEnvDevelopment && 'static/js/[name].bundle.js',
+      filename: function(chunk){
+        const chunkName = chunk.chunk.name.split('~')[1]
+        return isEnvProduction ? `${chunkName}/js/[name].[contenthash:8].chunk.js` : isEnvDevelopment && 'static/js/[name].chunk.js'
+      },
       // TODO: remove this when upgrading to webpack 5
       futureEmitAssets: true,
       // There are also additional JS chunk files if you use code splitting.
       chunkFilename: isEnvProduction
-        ? 'static/js/[name].[contenthash:8].chunk.js'
-        : isEnvDevelopment && 'static/js/[name].chunk.js',
+        ? '[name]/js/[name].[contenthash:8].chunk.js'
+        : isEnvDevelopment && 'js/[name].chunk.js',
       // We inferred the "public path" (such as / or /my-project) from homepage.
       // We use "/" in development.
       publicPath: publicPath,
@@ -287,7 +287,7 @@ module.exports = function(webpackEnv) {
       // https://medium.com/webpack/webpack-4-code-splitting-chunk-graph-and-the-splitchunks-optimization-be739a861366
       splitChunks: {
         chunks: 'all',
-        name: false,
+        name: true
       },
       // Keep the runtime chunk separated to enable long term caching
       // https://twitter.com/wSokra/status/969679223278505985
@@ -369,7 +369,11 @@ module.exports = function(webpackEnv) {
               loader: require.resolve('url-loader'),
               options: {
                 limit: 10000,
-                name: 'static/media/[name].[hash:8].[ext]',
+                name(file){
+                  const entry = file.split('src/')[1].split('/')[0]
+                  return `${entry}/[img]/[name].[ext]`
+                }
+                // name: 'static/media/[name].[hash:8].[ext]',
               },
             },
             // Process application JS with Babel.
@@ -506,7 +510,11 @@ module.exports = function(webpackEnv) {
               // by webpacks internal loaders.
               exclude: [/\.(js|mjs|jsx|ts|tsx)$/, /\.html$/, /\.json$/],
               options: {
-                name: 'static/media/[name].[hash:8].[ext]',
+                // name: 'static/media/[name].[hash:8].[ext]',
+                name(file){
+                  const entry = file.split('src/')[1].split('/')[0]
+                  return `${entry}/img/[name].[ext]`
+                }
               },
             },
             // ** STOP ** Are you adding a new loader?
@@ -580,8 +588,8 @@ module.exports = function(webpackEnv) {
         new MiniCssExtractPlugin({
           // Options similar to the same options in webpackOptions.output
           // both options are optional
-          filename: 'static/css/[name].[contenthash:8].css',
-          chunkFilename: 'static/css/[name].[contenthash:8].chunk.css',
+          filename: '[name]/css/[name].[contenthash:8].css',
+          chunkFilename: '[name]/css/[name].[contenthash:8].chunk.css',
         }),
       // Generate a manifest file which contains a mapping of all asset filenames
       // to their corresponding output file so that tools can pick it up without
